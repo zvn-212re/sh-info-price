@@ -1,0 +1,13 @@
+[
+  {
+    "period": "2020-10",
+    "materialKey": "99100600-双笼施工电梯-低速-安装高度-60m-月-台",
+    "materialCode": "99100600",
+    "materialName": "双笼施工电梯(低速)",
+    "spec": "安装高度≤60m",
+    "unit": "/月/台",
+    "taxIncludedPrice": 15200,
+    "publishDate": "2020-10-23",
+    "sourceFile": "2020-10.xls"
+  }
+]

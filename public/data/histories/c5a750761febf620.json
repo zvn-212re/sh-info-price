@@ -1,0 +1,13 @@
+[
+  {
+    "period": "2020-09",
+    "materialKey": "99510010-120-土方处置费-t",
+    "materialCode": "99510010-120",
+    "materialName": "土方处置费",
+    "spec": "",
+    "unit": "t",
+    "taxIncludedPrice": 15,
+    "publishDate": "2020-09-21",
+    "sourceFile": "2020-09.xls"
+  }
+]

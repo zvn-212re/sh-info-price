@@ -1,0 +1,13 @@
+[
+  {
+    "period": "2020-10",
+    "materialKey": "99100670-单笼施工电梯-货梯-安装高度-30m-1t-月-台",
+    "materialCode": "99100670",
+    "materialName": "单笼施工电梯(货梯)",
+    "spec": "安装高度≤30m、1t",
+    "unit": "/月/台",
+    "taxIncludedPrice": 8000,
+    "publishDate": "2020-10-23",
+    "sourceFile": "2020-10.xls"
+  }
+]

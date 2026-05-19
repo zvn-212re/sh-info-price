@@ -1,0 +1,24 @@
+[
+  {
+    "period": "2020-04",
+    "materialKey": "99250270-钢筋对焊机-75kva-台班",
+    "materialCode": "99250270",
+    "materialName": "钢筋对焊机 75kVA",
+    "spec": "",
+    "unit": "台班",
+    "taxIncludedPrice": 149.65,
+    "publishDate": "2020-04-21",
+    "sourceFile": "2020-04.xls"
+  },
+  {
+    "period": "2020-04",
+    "materialKey": "99250270-钢筋对焊机-75kva-台班",
+    "materialCode": "99250270",
+    "materialName": "钢筋对焊机 75kVA",
+    "spec": "",
+    "unit": "台班",
+    "taxIncludedPrice": 149.65,
+    "publishDate": "2020-04-21",
+    "sourceFile": "2020-04.xls"
+  }
+]

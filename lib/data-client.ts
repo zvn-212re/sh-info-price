@@ -1,0 +1,39 @@
+import type { DataManifest, PriceRecord, SearchIndexRecord } from "./types";
+
+async function readJson<T>(path: string): Promise<T> {
+  const response = await fetch(path, { cache: "no-store" });
+
+  if (!response.ok) {
+    throw new Error(`读取数据失败：${path}`);
+  }
+
+  return response.json() as Promise<T>;
+}
+
+export function fetchManifest() {
+  return readJson<DataManifest>("/data/manifest.json");
+}
+
+export function fetchLatest() {
+  return readJson<PriceRecord[]>("/data/latest.json");
+}
+
+export function fetchSearchIndex() {
+  return readJson<SearchIndexRecord[]>("/data/search-index.json");
+}
+
+export function fetchPeriod(period: string) {
+  return readJson<PriceRecord[]>(`/data/periods/${period}.json`);
+}
+
+export function fetchHistory(historyFile: string) {
+  return readJson<PriceRecord[]>(`/data/${historyFile}`);
+}
+
+export async function fetchAllPeriods(periods: string[]) {
+  const entries = await Promise.all(
+    periods.map(async (period) => [period, await fetchPeriod(period)] as const)
+  );
+
+  return new Map(entries);
+}

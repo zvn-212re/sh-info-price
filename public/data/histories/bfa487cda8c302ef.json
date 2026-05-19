@@ -1,0 +1,112 @@
+[
+  {
+    "period": "2019-05",
+    "materialKey": "80250720-粗粒式沥青混凝土ac-30-t",
+    "materialCode": "80250720",
+    "materialName": "粗粒式沥青混凝土AC-30",
+    "spec": "",
+    "unit": "t",
+    "taxIncludedPrice": 515.44,
+    "publishDate": "2019-05-20",
+    "sourceFile": "2019-05.xls"
+  },
+  {
+    "period": "2019-06",
+    "materialKey": "80250720-粗粒式沥青混凝土ac-30-t",
+    "materialCode": "80250720",
+    "materialName": "粗粒式沥青混凝土AC-30",
+    "spec": "",
+    "unit": "t",
+    "taxIncludedPrice": 520.44,
+    "publishDate": "2019-06-20",
+    "sourceFile": "2019-06.xls"
+  },
+  {
+    "period": "2019-07",
+    "materialKey": "80250720-粗粒式沥青混凝土ac-30-t",
+    "materialCode": "80250720",
+    "materialName": "粗粒式沥青混凝土AC-30",
+    "spec": "",
+    "unit": "t",
+    "taxIncludedPrice": 521.35,
+    "publishDate": "2019-07-20",
+    "sourceFile": "2019-07.xls"
+  },
+  {
+    "period": "2019-08",
+    "materialKey": "80250720-粗粒式沥青混凝土ac-30-t",
+    "materialCode": "80250720",
+    "materialName": "粗粒式沥青混凝土AC-30",
+    "spec": "",
+    "unit": "t",
+    "taxIncludedPrice": 523.49,
+    "publishDate": "2019-08-20",
+    "sourceFile": "2019-08.xls"
+  },
+  {
+    "period": "2019-09",
+    "materialKey": "80250720-粗粒式沥青混凝土ac-30-t",
+    "materialCode": "80250720",
+    "materialName": "粗粒式沥青混凝土AC-30",
+    "spec": "",
+    "unit": "t",
+    "taxIncludedPrice": 529.59,
+    "publishDate": "2019-09-20",
+    "sourceFile": "2019-09.xls"
+  },
+  {
+    "period": "2019-10",
+    "materialKey": "80250720-粗粒式沥青混凝土ac-30-t",
+    "materialCode": "80250720",
+    "materialName": "粗粒式沥青混凝土AC-30",
+    "spec": "",
+    "unit": "t",
+    "taxIncludedPrice": 539.39,
+    "publishDate": "2019-10-20",
+    "sourceFile": "2019-10.xls"
+  },
+  {
+    "period": "2019-11",
+    "materialKey": "80250720-粗粒式沥青混凝土ac-30-t",
+    "materialCode": "80250720",
+    "materialName": "粗粒式沥青混凝土AC-30",
+    "spec": "",
+    "unit": "t",
+    "taxIncludedPrice": 542.05,
+    "publishDate": "2019-11-20",
+    "sourceFile": "2019-11.xls"
+  },
+  {
+    "period": "2019-12",
+    "materialKey": "80250720-粗粒式沥青混凝土ac-30-t",
+    "materialCode": "80250720",
+    "materialName": "粗粒式沥青混凝土AC-30",
+    "spec": "",
+    "unit": "t",
+    "taxIncludedPrice": 540.75,
+    "publishDate": "2019-12-20",
+    "sourceFile": "2019-12.xls"
+  },
+  {
+    "period": "2020-01",
+    "materialKey": "80250720-粗粒式沥青混凝土ac-30-t",
+    "materialCode": "80250720",
+    "materialName": "粗粒式沥青混凝土AC-30",
+    "spec": "",
+    "unit": "t",
+    "taxIncludedPrice": 539.35,
+    "publishDate": "2020-01-20",
+    "sourceFile": "2020-01.xls"
+  },
+  {
+    "period": "2020-02",
+    "materialKey": "80250720-粗粒式沥青混凝土ac-30-t",
+    "materialCode": "80250720",
+    "materialName": "粗粒式沥青混凝土AC-30",
+    "spec": "",
+    "unit": "t",
+    "taxIncludedPrice": 539.19,
+    "publishDate": "2020-02-20",
+    "sourceFile": "2020-02.xls"
+  }
+]

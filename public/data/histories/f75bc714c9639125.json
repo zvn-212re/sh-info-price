@@ -1,0 +1,46 @@
+[
+  {
+    "period": "2020-04",
+    "materialKey": "04293141-040-装配式预制钢筋混凝土次梁-钢筋240kg-埋件15kg-m3",
+    "materialCode": "04293141-040",
+    "materialName": "装配式预制钢筋混凝土次梁（钢筋240kg 埋件15kg ）",
+    "spec": "",
+    "unit": "m3",
+    "taxIncludedPrice": 4474.01,
+    "publishDate": "2020-04-21",
+    "sourceFile": "2020-04.xls"
+  },
+  {
+    "period": "2020-05",
+    "materialKey": "04293141-040-装配式预制钢筋混凝土次梁-钢筋240kg-埋件15kg-m3",
+    "materialCode": "04293141-040",
+    "materialName": "装配式预制钢筋混凝土次梁（钢筋240kg 埋件15kg ）",
+    "spec": "",
+    "unit": "m3",
+    "taxIncludedPrice": 4465.06,
+    "publishDate": "2020-06-09",
+    "sourceFile": "2020-05.xls"
+  },
+  {
+    "period": "2020-06",
+    "materialKey": "04293141-040-装配式预制钢筋混凝土次梁-钢筋240kg-埋件15kg-m3",
+    "materialCode": "04293141-040",
+    "materialName": "装配式预制钢筋混凝土次梁（钢筋240kg 埋件15kg ）",
+    "spec": "",
+    "unit": "m3",
+    "taxIncludedPrice": 4375.76,
+    "publishDate": "2020-06-22",
+    "sourceFile": "2020-06.xls"
+  },
+  {
+    "period": "2020-07",
+    "materialKey": "04293141-040-装配式预制钢筋混凝土次梁-钢筋240kg-埋件15kg-m3",
+    "materialCode": "04293141-040",
+    "materialName": "装配式预制钢筋混凝土次梁（钢筋240kg 埋件15kg ）",
+    "spec": "",
+    "unit": "m3",
+    "taxIncludedPrice": 4288.25,
+    "publishDate": "2020-07-23",
+    "sourceFile": "2020-07.xls"
+  }
+]

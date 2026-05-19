@@ -1,0 +1,32 @@
+{
+  "name": "sh-info-price",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint",
+    "typecheck": "tsc --noEmit",
+    "fetch:data": "node scripts/fetch/fetch-shanghai-price.mjs",
+    "fetch:data:all": "node scripts/fetch/fetch-shanghai-price.mjs --all",
+    "parse:data": "node scripts/parse/parse-excel.mjs",
+    "build:index": "node scripts/parse/generate-index.mjs"
+  },
+  "dependencies": {
+    "@types/node": "^22.0.0",
+    "@types/react": "^19.0.0",
+    "@types/react-dom": "^19.0.0",
+    "date-fns": "^4.1.0",
+    "exceljs": "^4.4.0",
+    "lucide-react": "^0.468.0",
+    "next": "^15.0.0",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "recharts": "^2.13.0",
+    "typescript": "^5.7.0",
+    "xlsx": "^0.18.5",
+    "zod": "^3.24.0"
+  },
+  "devDependencies": {}
+}

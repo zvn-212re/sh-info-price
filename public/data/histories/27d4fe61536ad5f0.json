@@ -1,0 +1,46 @@
+[
+  {
+    "period": "2019-05",
+    "materialKey": "80230106-010-陶粒混凝土lc20mpa-1600kg-m3-m3",
+    "materialCode": "80230106-010",
+    "materialName": "陶粒混凝土LC20MPa 1600Kg/m3",
+    "spec": "",
+    "unit": "m3",
+    "taxIncludedPrice": 814,
+    "publishDate": "2019-05-20",
+    "sourceFile": "2019-05.xls"
+  },
+  {
+    "period": "2019-06",
+    "materialKey": "80230106-010-陶粒混凝土lc20mpa-1600kg-m3-m3",
+    "materialCode": "80230106-010",
+    "materialName": "陶粒混凝土LC20MPa 1600Kg/m3",
+    "spec": "",
+    "unit": "m3",
+    "taxIncludedPrice": 814,
+    "publishDate": "2019-06-20",
+    "sourceFile": "2019-06.xls"
+  },
+  {
+    "period": "2019-07",
+    "materialKey": "80230106-010-陶粒混凝土lc20mpa-1600kg-m3-m3",
+    "materialCode": "80230106-010",
+    "materialName": "陶粒混凝土LC20MPa 1600Kg/m3",
+    "spec": "",
+    "unit": "m3",
+    "taxIncludedPrice": 802,
+    "publishDate": "2019-07-20",
+    "sourceFile": "2019-07.xls"
+  },
+  {
+    "period": "2019-08",
+    "materialKey": "80230106-010-陶粒混凝土lc20mpa-1600kg-m3-m3",
+    "materialCode": "80230106-010",
+    "materialName": "陶粒混凝土LC20MPa 1600Kg/m3",
+    "spec": "",
+    "unit": "m3",
+    "taxIncludedPrice": 802,
+    "publishDate": "2019-08-20",
+    "sourceFile": "2019-08.xls"
+  }
+]

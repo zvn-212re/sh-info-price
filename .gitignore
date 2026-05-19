@@ -1,0 +1,12 @@
+node_modules
+.next
+out
+dist
+.env
+.env.local
+*.log
+coverage
+tsconfig.tsbuildinfo
+logs
+data/raw/**/*.xls
+data/processed/*.json

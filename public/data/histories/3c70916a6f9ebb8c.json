@@ -1,0 +1,13 @@
+[
+  {
+    "period": "2020-10",
+    "materialKey": "99100030-履带式起重机-100t-月-台",
+    "materialCode": "99100030",
+    "materialName": "履带式起重机",
+    "spec": "100t",
+    "unit": "/月/台",
+    "taxIncludedPrice": 119600,
+    "publishDate": "2020-10-23",
+    "sourceFile": "2020-10.xls"
+  }
+]

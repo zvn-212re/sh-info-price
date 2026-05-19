@@ -1,0 +1,13 @@
+[
+  {
+    "period": "2020-10",
+    "materialKey": "99100060-履带式起重机-200t-月-台",
+    "materialCode": "99100060",
+    "materialName": "履带式起重机",
+    "spec": "200t",
+    "unit": "/月/台",
+    "taxIncludedPrice": 201700,
+    "publishDate": "2020-10-23",
+    "sourceFile": "2020-10.xls"
+  }
+]

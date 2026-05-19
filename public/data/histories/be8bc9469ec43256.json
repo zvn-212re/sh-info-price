@@ -1,0 +1,13 @@
+[
+  {
+    "period": "2020-10",
+    "materialKey": "99100010-履带式起重机-50t-月-台",
+    "materialCode": "99100010",
+    "materialName": "履带式起重机",
+    "spec": "50t",
+    "unit": "/月/台",
+    "taxIncludedPrice": 71700,
+    "publishDate": "2020-10-23",
+    "sourceFile": "2020-10.xls"
+  }
+]

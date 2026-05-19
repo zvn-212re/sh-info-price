@@ -1,0 +1,112 @@
+[
+  {
+    "period": "2019-05",
+    "materialKey": "80250523-中粒式沥青混凝土ac-20-t",
+    "materialCode": "80250523",
+    "materialName": "中粒式沥青混凝土AC-20",
+    "spec": "",
+    "unit": "t",
+    "taxIncludedPrice": 547.03,
+    "publishDate": "2019-05-20",
+    "sourceFile": "2019-05.xls"
+  },
+  {
+    "period": "2019-06",
+    "materialKey": "80250523-中粒式沥青混凝土ac-20-t",
+    "materialCode": "80250523",
+    "materialName": "中粒式沥青混凝土AC-20",
+    "spec": "",
+    "unit": "t",
+    "taxIncludedPrice": 552.03,
+    "publishDate": "2019-06-20",
+    "sourceFile": "2019-06.xls"
+  },
+  {
+    "period": "2019-07",
+    "materialKey": "80250523-中粒式沥青混凝土ac-20-t",
+    "materialCode": "80250523",
+    "materialName": "中粒式沥青混凝土AC-20",
+    "spec": "",
+    "unit": "t",
+    "taxIncludedPrice": 553.05,
+    "publishDate": "2019-07-20",
+    "sourceFile": "2019-07.xls"
+  },
+  {
+    "period": "2019-08",
+    "materialKey": "80250523-中粒式沥青混凝土ac-20-t",
+    "materialCode": "80250523",
+    "materialName": "中粒式沥青混凝土AC-20",
+    "spec": "",
+    "unit": "t",
+    "taxIncludedPrice": 555.45,
+    "publishDate": "2019-08-20",
+    "sourceFile": "2019-08.xls"
+  },
+  {
+    "period": "2019-09",
+    "materialKey": "80250523-中粒式沥青混凝土ac-20-t",
+    "materialCode": "80250523",
+    "materialName": "中粒式沥青混凝土AC-20",
+    "spec": "",
+    "unit": "t",
+    "taxIncludedPrice": 561.67,
+    "publishDate": "2019-09-20",
+    "sourceFile": "2019-09.xls"
+  },
+  {
+    "period": "2019-10",
+    "materialKey": "80250523-中粒式沥青混凝土ac-20-t",
+    "materialCode": "80250523",
+    "materialName": "中粒式沥青混凝土AC-20",
+    "spec": "",
+    "unit": "t",
+    "taxIncludedPrice": 572.01,
+    "publishDate": "2019-10-20",
+    "sourceFile": "2019-10.xls"
+  },
+  {
+    "period": "2019-11",
+    "materialKey": "80250523-中粒式沥青混凝土ac-20-t",
+    "materialCode": "80250523",
+    "materialName": "中粒式沥青混凝土AC-20",
+    "spec": "",
+    "unit": "t",
+    "taxIncludedPrice": 574.41,
+    "publishDate": "2019-11-20",
+    "sourceFile": "2019-11.xls"
+  },
+  {
+    "period": "2019-12",
+    "materialKey": "80250523-中粒式沥青混凝土ac-20-t",
+    "materialCode": "80250523",
+    "materialName": "中粒式沥青混凝土AC-20",
+    "spec": "",
+    "unit": "t",
+    "taxIncludedPrice": 572.63,
+    "publishDate": "2019-12-20",
+    "sourceFile": "2019-12.xls"
+  },
+  {
+    "period": "2020-01",
+    "materialKey": "80250523-中粒式沥青混凝土ac-20-t",
+    "materialCode": "80250523",
+    "materialName": "中粒式沥青混凝土AC-20",
+    "spec": "",
+    "unit": "t",
+    "taxIncludedPrice": 571.31,
+    "publishDate": "2020-01-20",
+    "sourceFile": "2020-01.xls"
+  },
+  {
+    "period": "2020-02",
+    "materialKey": "80250523-中粒式沥青混凝土ac-20-t",
+    "materialCode": "80250523",
+    "materialName": "中粒式沥青混凝土AC-20",
+    "spec": "",
+    "unit": "t",
+    "taxIncludedPrice": 571.37,
+    "publishDate": "2020-02-20",
+    "sourceFile": "2020-02.xls"
+  }
+]

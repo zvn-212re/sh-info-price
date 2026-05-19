@@ -1,0 +1,112 @@
+[
+  {
+    "period": "2019-05",
+    "materialKey": "80250921-沥青混凝土抗滑表层ak-13-0-t",
+    "materialCode": "80250921",
+    "materialName": "沥青混凝土抗滑表层AK-13-0",
+    "spec": "",
+    "unit": "t",
+    "taxIncludedPrice": 660.48,
+    "publishDate": "2019-05-20",
+    "sourceFile": "2019-05.xls"
+  },
+  {
+    "period": "2019-06",
+    "materialKey": "80250921-沥青混凝土抗滑表层ak-13-0-t",
+    "materialCode": "80250921",
+    "materialName": "沥青混凝土抗滑表层AK-13-0",
+    "spec": "",
+    "unit": "t",
+    "taxIncludedPrice": 665.48,
+    "publishDate": "2019-06-20",
+    "sourceFile": "2019-06.xls"
+  },
+  {
+    "period": "2019-07",
+    "materialKey": "80250921-沥青混凝土抗滑表层ak-13-0-t",
+    "materialCode": "80250921",
+    "materialName": "沥青混凝土抗滑表层AK-13-0",
+    "spec": "",
+    "unit": "t",
+    "taxIncludedPrice": 666.75,
+    "publishDate": "2019-07-20",
+    "sourceFile": "2019-07.xls"
+  },
+  {
+    "period": "2019-08",
+    "materialKey": "80250921-沥青混凝土抗滑表层ak-13-0-t",
+    "materialCode": "80250921",
+    "materialName": "沥青混凝土抗滑表层AK-13-0",
+    "spec": "",
+    "unit": "t",
+    "taxIncludedPrice": 669.71,
+    "publishDate": "2019-08-20",
+    "sourceFile": "2019-08.xls"
+  },
+  {
+    "period": "2019-09",
+    "materialKey": "80250921-沥青混凝土抗滑表层ak-13-0-t",
+    "materialCode": "80250921",
+    "materialName": "沥青混凝土抗滑表层AK-13-0",
+    "spec": "",
+    "unit": "t",
+    "taxIncludedPrice": 676.23,
+    "publishDate": "2019-09-20",
+    "sourceFile": "2019-09.xls"
+  },
+  {
+    "period": "2019-10",
+    "materialKey": "80250921-沥青混凝土抗滑表层ak-13-0-t",
+    "materialCode": "80250921",
+    "materialName": "沥青混凝土抗滑表层AK-13-0",
+    "spec": "",
+    "unit": "t",
+    "taxIncludedPrice": 687.81,
+    "publishDate": "2019-10-20",
+    "sourceFile": "2019-10.xls"
+  },
+  {
+    "period": "2019-11",
+    "materialKey": "80250921-沥青混凝土抗滑表层ak-13-0-t",
+    "materialCode": "80250921",
+    "materialName": "沥青混凝土抗滑表层AK-13-0",
+    "spec": "",
+    "unit": "t",
+    "taxIncludedPrice": 689.59,
+    "publishDate": "2019-11-20",
+    "sourceFile": "2019-11.xls"
+  },
+  {
+    "period": "2019-12",
+    "materialKey": "80250921-沥青混凝土抗滑表层ak-13-0-t",
+    "materialCode": "80250921",
+    "materialName": "沥青混凝土抗滑表层AK-13-0",
+    "spec": "",
+    "unit": "t",
+    "taxIncludedPrice": 686.69,
+    "publishDate": "2019-12-20",
+    "sourceFile": "2019-12.xls"
+  },
+  {
+    "period": "2020-01",
+    "materialKey": "80250921-沥青混凝土抗滑表层ak-13-0-t",
+    "materialCode": "80250921",
+    "materialName": "沥青混凝土抗滑表层AK-13-0",
+    "spec": "",
+    "unit": "t",
+    "taxIncludedPrice": 685.51,
+    "publishDate": "2020-01-20",
+    "sourceFile": "2020-01.xls"
+  },
+  {
+    "period": "2020-02",
+    "materialKey": "80250921-沥青混凝土抗滑表层ak-13-0-t",
+    "materialCode": "80250921",
+    "materialName": "沥青混凝土抗滑表层AK-13-0",
+    "spec": "",
+    "unit": "t",
+    "taxIncludedPrice": 686.04,
+    "publishDate": "2020-02-20",
+    "sourceFile": "2020-02.xls"
+  }
+]

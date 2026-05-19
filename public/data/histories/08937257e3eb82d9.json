@@ -1,0 +1,24 @@
+[
+  {
+    "period": "2020-08",
+    "materialKey": "土方外运10公里以内-t",
+    "materialCode": "",
+    "materialName": "土方外运10公里以内",
+    "spec": "",
+    "unit": "t",
+    "taxIncludedPrice": 29.85,
+    "publishDate": "2020-08-15",
+    "sourceFile": "2020-08.xls"
+  },
+  {
+    "period": "2020-09",
+    "materialKey": "土方外运10公里以内-t",
+    "materialCode": "",
+    "materialName": "土方外运10公里以内",
+    "spec": "",
+    "unit": "t",
+    "taxIncludedPrice": 29.85,
+    "publishDate": "2020-09-15",
+    "sourceFile": "2020-09.xls"
+  }
+]
