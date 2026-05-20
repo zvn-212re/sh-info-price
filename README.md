@@ -74,14 +74,14 @@ npm run fetch:data
 
 ## 主站集成
 
-Solaris Wiki 当前通过站内静态查询工具复用本项目数据：
+Solaris Wiki 当前把本项目作为独立应用入口，主站只保留卡片按钮和 `/sh-info-price/` 备用工具：
 
+- 独立应用入口：`https://sh-info-price.vercel.app/`
+- 正式静态数据源：`https://sh-info-price.vercel.app/data/`
 - 主站路径：`H:\codex\personl web\solaris-wiki`
 - 主站构建脚本：`scripts/build-price-app.js`
-- 数据来源：本项目 `public/data`
-- 站内路径：`/sh-info-price/`
 
-本项目仍保留完整 Next.js 应用源码；主站只复制静态数据并生成轻量查询入口。
+主站备用工具默认从正式静态托管地址读取 JSON，不再依赖 GitHub raw。若部署域名不同，在主站设置 `SH_INFO_PRICE_APP_URL` 和 `SH_INFO_PRICE_DATA_BASE_URL`。
 
 ## Codex 接手说明
 

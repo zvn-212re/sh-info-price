@@ -1,45 +1,45 @@
-# 主站集成准备
+# Solaris Wiki 主站接入
 
-目标主站：`H:\codex\personl web\solaris-wiki`
+## 推荐架构
 
-当前已采用的站内集成方式：
+信息价项目独立部署为完整 Next.js 应用，同时把 `public/data/` 作为正式静态数据源托管：
 
-1. 本项目继续作为独立 Next.js 应用维护源码、抓取脚本、解析脚本和 `public/data` 静态数据。
-2. 主站 `Solaris Wiki` 使用 `tools/sh-info-price/` 中的轻量静态查询页。
-3. 主站构建脚本 `scripts/build-price-app.js` 会从本项目复制 `public/data` 到主站输出目录：
-   - `dist/sh-info-price/data`
-   - 本地预览目录 `sh-info-price/data`
-4. 主站首页、项目列表和项目详情按钮都指向 `sh-info-price/`。
+1. `sh-info-price` 负责页面、检索、趋势图和 `/data/*` 静态 JSON。
+2. Solaris Wiki 主站只保留入口按钮，默认跳转到独立应用。
+3. 主站内置的 `/sh-info-price/` 轻量工具只作为备用入口，数据从正式静态托管地址读取。
+4. 不再依赖 GitHub raw 作为生产数据源。
 
-这种方式让价格查询在主站可用，同时不把完整 Next.js 源码塞进主站目录。
+默认地址：
 
-后续如果需要恢复为独立应用外链，推荐集成方式：
-
-1. 本项目作为独立 Vercel 应用部署，获得完整访问地址。
-2. 主站项目页增加一个“上海信息价数据库比对系统”项目卡片。
-3. 卡片内展示静态截图或 iframe 预览。
-4. 卡片按钮跳转到完整 Vercel 地址。
-
-建议主站外链配置：
-
-```html
-<a href="https://your-sh-info-price.vercel.app" target="_blank" rel="noopener">
-  打开完整版本
-</a>
+```txt
+应用入口：https://sh-info-price.vercel.app/
+数据源：https://sh-info-price.vercel.app/data/
 ```
 
-如果需要内嵌预览，建议使用：
+如果 Vercel 项目使用了不同域名，在主站构建环境设置：
 
-```html
-<iframe
-  src="https://your-sh-info-price.vercel.app"
-  title="上海信息价数据库比对系统预览"
-  loading="lazy"
-></iframe>
+```txt
+SH_INFO_PRICE_APP_URL=https://your-domain.example/
+SH_INFO_PRICE_DATA_BASE_URL=https://your-domain.example/data/
 ```
 
-注意：
+## 静态数据缓存
 
-- 完整系统不要直接塞进主站目录，避免主站静态结构和 Next.js 构建产物互相污染。
-- 主站只负责展示入口和预览。
-- 本项目独立维护数据更新、构建和部署。
+本项目的 `vercel.json` 对 `/data/*` 设置了：
+
+- `Cache-Control: public, max-age=3600, s-maxage=86400, stale-while-revalidate=604800`
+- `Access-Control-Allow-Origin: *`
+
+这样主站和独立应用都可以跨域读取公开 JSON，浏览器首屏只加载 `manifest.json`、`latest.json` 和 `search-index.json`，单材料历史文件继续按需加载。
+
+## 备用站内工具
+
+Solaris Wiki 的 `scripts/build-price-app.js` 会继续生成 `/sh-info-price/` 备用工具，但默认不再复制完整 `public/data`，以免主站部署包重复携带大体积数据。
+
+如需离线或本地完整预览，可在主站构建时临时启用：
+
+```txt
+SH_INFO_PRICE_COPY_LOCAL_DATA=1
+```
+
+启用后主站备用工具优先读本地 `/sh-info-price/data/`，失败时仍回退到正式静态数据源。

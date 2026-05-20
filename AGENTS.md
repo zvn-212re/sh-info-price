@@ -83,10 +83,10 @@
 
 - 真实官网数据抓取未完成：`scripts/fetch/fetch-shanghai-price.mjs` 目前只是占位脚本，尚未接入上海建设工程信息价官网真实下载链接。
 - 真实 Excel 样本解析未验证：解析脚本已写，但还没有用官网 Excel 校准合并单元格、复杂表头、多 sheet、空行和异常格式。
-- 当前数据仍是模拟数据：`public/data` 中 `2025-11` 到 `2026-04` 只是演示数据，不是真实信息价。
+- 当前 `public/data` 已由真实官网 Excel 生成，提交后由独立 Vercel 应用作为正式静态数据源托管。
 - 自动化更新未接入：尚未配置每月自动下载、解析、生成 JSON、提交并触发 Vercel 部署的流程。
-- 主站已接入站内轻量查询工具：`H:\codex\personl web\solaris-wiki\tools\sh-info-price` 复用本项目 `public/data`，构建后挂载到 `/sh-info-price/`。
-- 完整版本尚未部署到 Vercel：本地构建通过，但还没有创建 Vercel 项目、绑定仓库和生成正式访问地址。
+- 主站已改为独立应用入口；`H:\codex\personl web\solaris-wiki\tools\sh-info-price` 仅作为备用查询工具，默认读取正式静态数据源。
+- 正式默认访问地址按 `https://sh-info-price.vercel.app/` 和 `https://sh-info-price.vercel.app/data/` 配置；若 Vercel 实际域名不同，需要同步更新主站环境变量。
 - 搜索能力仍是基础版：当前是简单关键词匹配，后续可升级为 MiniSearch、拼音搜索、规格筛选和更强排序。
 - 数据质量报告未完成：解析失败行、重复材料、异常价格、缺失字段等还没有报告页面或日志汇总。
 - 导出功能是基础版：当前仅导出查询结果，尚未支持趋势导出、对比报告导出和更完整的 Excel 格式。
@@ -116,7 +116,7 @@ http://localhost:3000
 1. 如果用户要继续开发，先确认是否仍使用静态 JSON MVP 路线。
 2. 优先接真实 Excel 样本，验证 `parse-excel.mjs` 对合并单元格、空行、表头偏移的处理。
 3. 拿到官网真实下载链接后，再补 `fetch-shanghai-price.mjs`。
-4. 主站如需更新站内查询数据，先在本项目重新生成 `public/data`，再运行主站构建脚本复制数据。
+4. 主站如需更新入口域名，设置 `SH_INFO_PRICE_APP_URL` 和 `SH_INFO_PRICE_DATA_BASE_URL`；只有离线预览需要完整本地数据时才设置 `SH_INFO_PRICE_COPY_LOCAL_DATA=1`。
 5. 不要把完整 Next.js 项目源码直接塞进主站目录；主站只挂载轻量静态查询页和数据副本。
 
 ## 常用命令
