@@ -82,3 +82,19 @@
 - 当前机器的 `node` / `npm` 不在 PATH 中，本次使用 Codex runtime 内置 Node。
 - `next build` 在 Windows 本机提示 SWC native 包不可用，但已回退 wasm 并构建成功。
 - 建筑劳务信息接口已识别，抓取脚本支持 `--source=labor` / `--source=all`，但主站 MVP 当前仍只消费材料信息价记录。
+
+## 2026-05-20
+
+### 主站可用入口
+
+- 配合 `H:\codex\personl web\solaris-wiki` 完成站内查询入口。
+- 本项目继续负责真实数据抓取、Excel 解析和 `public/data` 静态数据生成。
+- 主站新增轻量静态查询页，构建时复制本项目 `public/data`，挂载到 Solaris Wiki 的 `/sh-info-price/`。
+- 该站内版本支持关键词检索、分页、材料历史趋势、两期价格对比和 CSV 导出。
+
+### 构建说明
+
+- 曾尝试为 Next.js 应用增加 `/sh-info-price/` 子路径静态导出准备：
+  - `next.config.mjs` 支持 `NEXT_PUBLIC_BASE_PATH`、`SH_INFO_PRICE_STATIC_EXPORT=1`。
+  - `lib/data-client.ts` 支持按 `NEXT_PUBLIC_BASE_PATH` 前缀读取静态数据。
+- 当前本机执行 Next 静态导出时长时间停在启动阶段，未进入有效编译输出。因此主站本轮采用独立静态查询页复用数据的方式，避免阻塞站内可用目标。

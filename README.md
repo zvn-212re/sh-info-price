@@ -72,6 +72,17 @@ npm run fetch:data
 
 生成新的 `public/data` 后提交到仓库，Vercel 会自动重新部署。
 
+## 主站集成
+
+Solaris Wiki 当前通过站内静态查询工具复用本项目数据：
+
+- 主站路径：`H:\codex\personl web\solaris-wiki`
+- 主站构建脚本：`scripts/build-price-app.js`
+- 数据来源：本项目 `public/data`
+- 站内路径：`/sh-info-price/`
+
+本项目仍保留完整 Next.js 应用源码；主站只复制静态数据并生成轻量查询入口。
+
 ## Codex 接手说明
 
 项目级协作上下文写在 `AGENTS.md`。下次继续开发时，优先读取该文件，可快速恢复项目状态、技术路线和主站集成约定。

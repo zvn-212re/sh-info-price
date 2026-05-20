@@ -1,7 +1,13 @@
 import type { DataManifest, PriceRecord, SearchIndexRecord } from "./types";
 
+const DATA_BASE_PATH = (process.env.NEXT_PUBLIC_BASE_PATH || "").replace(/\/$/, "");
+
+function withDataBasePath(path: string) {
+  return `${DATA_BASE_PATH}${path}`;
+}
+
 async function readJson<T>(path: string): Promise<T> {
-  const response = await fetch(path, { cache: "no-store" });
+  const response = await fetch(withDataBasePath(path), { cache: "no-store" });
 
   if (!response.ok) {
     throw new Error(`读取数据失败：${path}`);

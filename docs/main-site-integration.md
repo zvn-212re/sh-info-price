@@ -2,7 +2,18 @@
 
 目标主站：`H:\codex\personl web\solaris-wiki`
 
-推荐集成方式：
+当前已采用的站内集成方式：
+
+1. 本项目继续作为独立 Next.js 应用维护源码、抓取脚本、解析脚本和 `public/data` 静态数据。
+2. 主站 `Solaris Wiki` 使用 `tools/sh-info-price/` 中的轻量静态查询页。
+3. 主站构建脚本 `scripts/build-price-app.js` 会从本项目复制 `public/data` 到主站输出目录：
+   - `dist/sh-info-price/data`
+   - 本地预览目录 `sh-info-price/data`
+4. 主站首页、项目列表和项目详情按钮都指向 `sh-info-price/`。
+
+这种方式让价格查询在主站可用，同时不把完整 Next.js 源码塞进主站目录。
+
+后续如果需要恢复为独立应用外链，推荐集成方式：
 
 1. 本项目作为独立 Vercel 应用部署，获得完整访问地址。
 2. 主站项目页增加一个“上海信息价数据库比对系统”项目卡片。
