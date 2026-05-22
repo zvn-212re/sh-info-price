@@ -1,17 +1,21 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import Link from "next/link";
+import { Fragment, useCallback, useEffect, useMemo, useState } from "react";
 import {
-  ArrowDownRight,
-  ArrowUpRight,
+  ChevronDown,
   ChevronLeft,
   ChevronRight,
+  ChevronUp,
   Download,
   RefreshCcw,
-  Search
+  Search,
+  X
 } from "lucide-react";
 import {
+  Brush,
   CartesianGrid,
+  Legend,
   Line,
   LineChart,
   ResponsiveContainer,
@@ -21,21 +25,64 @@ import {
 } from "recharts";
 import { fetchHistory, fetchLatest, fetchManifest, fetchSearchIndex } from "@/lib/data-client";
 import { formatPercent, formatPrice } from "@/lib/format";
-import { recordMatches, sortByMaterial } from "@/lib/search";
-import type { DataManifest, PriceRecord, SearchIndexRecord } from "@/lib/types";
+import { searchMaterials } from "@/lib/search";
+import { buildTrendRows, sortHistory, summarizeHistory, uniqueHistoryPeriods } from "@/lib/trend";
+import type { DataManifest, MaterialEntity, PriceRecord } from "@/lib/types";
 
 type LoadState = "loading" | "ready" | "error";
-const PAGE_SIZE = 50;
+type BrushRange = { startIndex: number; endIndex: number };
 
-function compareRecords(base?: PriceRecord, target?: PriceRecord) {
-  if (!base || !target) {
-    return { base, target, diff: null, percent: null };
-  }
+const PAGE_SIZE = 30;
+const MAX_COMPARE = 5;
+const CHART_COLORS = ["#2563eb", "#0f766e", "#dc2626", "#9333ea", "#d97706"];
 
-  const diff = target.taxIncludedPrice - base.taxIncludedPrice;
-  const percent = base.taxIncludedPrice === 0 ? null : (diff / base.taxIncludedPrice) * 100;
+function entityFallbackHistory(entity: MaterialEntity): PriceRecord[] {
+  return [
+    {
+      period: entity.latestPeriod,
+      materialEntityId: entity.id,
+      materialKey: entity.materialKey,
+      materialCode: entity.code,
+      materialName: entity.displayName,
+      spec: entity.spec,
+      unit: entity.unit,
+      taxIncludedPrice: entity.latestPrice,
+      publishDate: entity.publishDate,
+      sourceFile: entity.sourceFile,
+      historyFile: entity.historyFile
+    }
+  ];
+}
 
-  return { base, target, diff, percent };
+function entityLabel(entity: MaterialEntity) {
+  return [entity.displayName, entity.spec].filter(Boolean).join(" ");
+}
+
+function historyForEntity(cache: Map<string, PriceRecord[]>, entity?: MaterialEntity) {
+  if (!entity) return [];
+  return cache.get(entity.id) ?? entityFallbackHistory(entity);
+}
+
+function logHistoryDiagnostic(entity: MaterialEntity, history: PriceRecord[]) {
+  if (process.env.NODE_ENV === "production") return;
+
+  const periods = uniqueHistoryPeriods(history).map((record) => record.period);
+  console.info("[material-history-diagnostic]", {
+    entityId: entity.id,
+    code: entity.code,
+    displayName: entity.displayName,
+    records: history.length,
+    periods: periods.length,
+    periodRange: periods.length > 0 ? `${periods[0]}..${periods.at(-1)}` : "empty"
+  });
+}
+
+function rangeText(rows: Array<{ period: string }>) {
+  const first = rows[0]?.period;
+  const last = rows.at(-1)?.period;
+
+  if (!first || !last) return "-";
+  return first === last ? first : `${first} 至 ${last}`;
 }
 
 export function PriceDashboard() {
@@ -43,14 +90,17 @@ export function PriceDashboard() {
   const [error, setError] = useState("");
   const [manifest, setManifest] = useState<DataManifest | null>(null);
   const [latest, setLatest] = useState<PriceRecord[]>([]);
-  const [materials, setMaterials] = useState<SearchIndexRecord[]>([]);
+  const [materials, setMaterials] = useState<MaterialEntity[]>([]);
   const [historyCache, setHistoryCache] = useState<Map<string, PriceRecord[]>>(new Map());
-  const [selectedHistory, setSelectedHistory] = useState<PriceRecord[]>([]);
+  const [historyLoading, setHistoryLoading] = useState<Set<string>>(new Set());
   const [keyword, setKeyword] = useState("水泥");
   const [page, setPage] = useState(1);
-  const [selectedKey, setSelectedKey] = useState<string>("");
-  const [monthA, setMonthA] = useState("");
-  const [monthB, setMonthB] = useState("");
+  const [selectedId, setSelectedId] = useState("");
+  const [compareIds, setCompareIds] = useState<string[]>([]);
+  const [expandedIds, setExpandedIds] = useState<Set<string>>(new Set());
+  const [compareNotice, setCompareNotice] = useState("");
+  const [brushRange, setBrushRange] = useState<BrushRange>({ startIndex: 0, endIndex: 0 });
+  const [rangeMode, setRangeMode] = useState<"all" | "6" | "12" | "custom">("all");
 
   useEffect(() => {
     let mounted = true;
@@ -68,9 +118,7 @@ export function PriceDashboard() {
         setManifest(nextManifest);
         setLatest(nextLatest);
         setMaterials(nextMaterials);
-        setMonthA(nextManifest.periods.at(-2) ?? nextManifest.latestPeriod);
-        setMonthB(nextManifest.latestPeriod);
-        setSelectedKey(nextMaterials[0]?.materialKey ?? nextLatest[0]?.materialKey ?? "");
+        setSelectedId(nextMaterials[0]?.id ?? "");
         setStatus("ready");
       } catch (loadError) {
         if (!mounted) return;
@@ -86,12 +134,8 @@ export function PriceDashboard() {
     };
   }, []);
 
-  const matchedResults = useMemo(() => {
-    return sortByMaterial(materials.filter((record) => recordMatches(record, keyword)));
-  }, [keyword, materials]);
-
+  const matchedResults = useMemo(() => searchMaterials(materials, keyword), [keyword, materials]);
   const totalPages = Math.max(1, Math.ceil(matchedResults.length / PAGE_SIZE));
-
   const pagedResults = useMemo(() => {
     const start = (page - 1) * PAGE_SIZE;
     return matchedResults.slice(start, start + PAGE_SIZE);
@@ -107,94 +151,186 @@ export function PriceDashboard() {
 
   useEffect(() => {
     if (matchedResults.length === 0) {
-      setSelectedKey("");
+      setSelectedId("");
       return;
     }
 
-    if (!matchedResults.some((record) => record.materialKey === selectedKey)) {
-      setSelectedKey(matchedResults[0].materialKey);
+    if (!matchedResults.some((entity) => entity.id === selectedId)) {
+      setSelectedId(matchedResults[0].id);
     }
-  }, [matchedResults, selectedKey]);
+  }, [matchedResults, selectedId]);
 
-  const selectedRecord = useMemo(() => {
+  const selectedEntity = useMemo(() => {
     return (
-      matchedResults.find((record) => record.materialKey === selectedKey) ??
-      materials.find((record) => record.materialKey === selectedKey) ??
-      matchedResults[0]
+      materials.find((entity) => entity.id === selectedId) ??
+      matchedResults[0] ??
+      materials[0]
     );
-  }, [matchedResults, materials, selectedKey]);
+  }, [matchedResults, materials, selectedId]);
 
-  useEffect(() => {
-    let mounted = true;
-
-    async function loadHistory(record: PriceRecord) {
-      if (!record.historyFile) {
-        setSelectedHistory([record]);
+  const loadHistory = useCallback(
+    async (entity: MaterialEntity) => {
+      if (historyCache.has(entity.id) || historyLoading.has(entity.id)) {
         return;
       }
 
-      const cached = historyCache.get(record.materialKey);
-      if (cached) {
-        setSelectedHistory(cached);
-        return;
-      }
+      setHistoryLoading((current) => new Set(current).add(entity.id));
 
       try {
-        const history = await fetchHistory(record.historyFile);
-        if (!mounted) return;
-        setHistoryCache((current) => new Map(current).set(record.materialKey, history));
-        setSelectedHistory(history);
+        const history = entity.historyFile
+          ? await fetchHistory(entity.historyFile)
+          : entityFallbackHistory(entity);
+        logHistoryDiagnostic(entity, history);
+        setHistoryCache((current) => new Map(current).set(entity.id, sortHistory(history)));
       } catch {
-        if (!mounted) return;
-        setSelectedHistory([record]);
+        const fallback = entityFallbackHistory(entity);
+        logHistoryDiagnostic(entity, fallback);
+        setHistoryCache((current) => new Map(current).set(entity.id, fallback));
+      } finally {
+        setHistoryLoading((current) => {
+          const next = new Set(current);
+          next.delete(entity.id);
+          return next;
+        });
       }
+    },
+    [historyCache, historyLoading]
+  );
+
+  const comparisonEntities = useMemo(() => {
+    const selectedForChart = compareIds.length > 0 ? compareIds : selectedEntity ? [selectedEntity.id] : [];
+    return selectedForChart
+      .map((id) => materials.find((entity) => entity.id === id))
+      .filter((entity): entity is MaterialEntity => Boolean(entity));
+  }, [compareIds, materials, selectedEntity]);
+
+  useEffect(() => {
+    for (const entity of comparisonEntities) {
+      loadHistory(entity);
     }
+  }, [comparisonEntities, loadHistory]);
 
-    if (selectedRecord) {
-      loadHistory(selectedRecord);
-    } else {
-      setSelectedHistory([]);
+  const trendRows = useMemo(() => {
+    return buildTrendRows(
+      comparisonEntities.map((entity) => ({
+        entity,
+        history: historyForEntity(historyCache, entity)
+      }))
+    );
+  }, [comparisonEntities, historyCache]);
+
+  useEffect(() => {
+    setBrushRange({
+      startIndex: 0,
+      endIndex: Math.max(0, trendRows.length - 1)
+    });
+    setRangeMode("all");
+  }, [trendRows.length, comparisonEntities.map((entity) => entity.id).join("|")]);
+
+  const visibleTrendRows = useMemo(() => {
+    if (trendRows.length === 0) return [];
+
+    const startIndex = Math.max(0, Math.min(brushRange.startIndex, trendRows.length - 1));
+    const endIndex = Math.max(startIndex, Math.min(brushRange.endIndex, trendRows.length - 1));
+    return trendRows.slice(startIndex, endIndex + 1);
+  }, [brushRange, trendRows]);
+  const visiblePeriods = useMemo(
+    () => new Set(visibleTrendRows.map((row) => row.period)),
+    [visibleTrendRows]
+  );
+  const focusedEntity =
+    comparisonEntities.find((entity) => entity.id === selectedEntity?.id) ?? comparisonEntities[0];
+  const focusedHistory = historyForEntity(historyCache, focusedEntity);
+  const focusedSummary = useMemo(
+    () => summarizeHistory(focusedHistory, visiblePeriods),
+    [focusedHistory, visiblePeriods]
+  );
+  const focusedAllPointCount = uniqueHistoryPeriods(focusedHistory).length;
+  const unitSet = new Set(comparisonEntities.map((entity) => entity.unit).filter(Boolean));
+
+  function selectEntity(entity: MaterialEntity) {
+    setSelectedId(entity.id);
+    setCompareNotice("");
+    loadHistory(entity);
+
+    if (compareIds.length <= 1) {
+      setCompareIds([entity.id]);
     }
+  }
 
-    return () => {
-      mounted = false;
-    };
-  }, [historyCache, selectedRecord]);
+  function toggleCompare(entity: MaterialEntity) {
+    setCompareNotice("");
+    setCompareIds((current) => {
+      if (current.includes(entity.id)) {
+        return current.filter((id) => id !== entity.id);
+      }
 
-  const trend = useMemo(() => {
-    return selectedHistory.map((record) => ({
-      period: record.period,
-      price: record.taxIncludedPrice,
-      unit: record.unit
-    }));
-  }, [selectedHistory]);
+      if (current.length >= MAX_COMPARE) {
+        setCompareNotice(`最多同时对比 ${MAX_COMPARE} 个材料。`);
+        return current;
+      }
 
-  const compare = useMemo(() => {
-    if (!selectedRecord) {
-      return compareRecords();
-    }
+      return [...current, entity.id];
+    });
+    loadHistory(entity);
+  }
 
-    const base = selectedHistory.find((record) => record.period === monthA);
-    const target = selectedHistory.find((record) => record.period === monthB);
+  function toggleExpanded(entity: MaterialEntity) {
+    setExpandedIds((current) => {
+      const next = new Set(current);
+      if (next.has(entity.id)) {
+        next.delete(entity.id);
+      } else {
+        next.add(entity.id);
+        loadHistory(entity);
+      }
+      return next;
+    });
+  }
 
-    return compareRecords(base, target);
-  }, [monthA, monthB, selectedHistory, selectedRecord]);
+  function setRecentRange(months: 6 | 12) {
+    if (trendRows.length === 0) return;
+
+    const endPeriod = trendRows.at(-1)?.period;
+    const periodIndex = manifest?.periods.findIndex((period) => period === endPeriod) ?? -1;
+    const cutoff =
+      periodIndex >= 0 ? manifest?.periods[Math.max(0, periodIndex - months + 1)] : undefined;
+    const startIndex = cutoff
+      ? trendRows.findIndex((row) => row.period.localeCompare(cutoff, "zh-CN") >= 0)
+      : Math.max(0, trendRows.length - months);
+
+    setBrushRange({
+      startIndex: startIndex >= 0 ? startIndex : 0,
+      endIndex: trendRows.length - 1
+    });
+    setRangeMode(months === 6 ? "6" : "12");
+  }
+
+  function setAllRange() {
+    setBrushRange({
+      startIndex: 0,
+      endIndex: Math.max(0, trendRows.length - 1)
+    });
+    setRangeMode("all");
+  }
 
   async function exportResults() {
     const xlsx = await import("xlsx");
-    const rows = matchedResults.map((record) => ({
-      月份: record.period,
-      材料编码: record.materialCode,
-      材料名称: record.materialName,
-      规格型号: record.spec,
-      单位: record.unit,
-      信息价含税: record.taxIncludedPrice,
-      发布日期: record.publishDate
+    const rows = matchedResults.map((entity) => ({
+      材料实体ID: entity.id,
+      材料编码: entity.code,
+      材料名称: entity.displayName,
+      规格型号: entity.spec,
+      单位: entity.unit,
+      最新期数: entity.latestPeriod,
+      最新含税价: entity.latestPrice,
+      有效历史期数: entity.periodCount,
+      涨跌幅: entity.priceChangePercent
     }));
     const sheet = xlsx.utils.json_to_sheet(rows);
     const book = xlsx.utils.book_new();
-    xlsx.utils.book_append_sheet(book, sheet, "查询结果");
-    xlsx.writeFile(book, `上海信息价查询结果-${manifest?.latestPeriod ?? "latest"}.xlsx`);
+    xlsx.utils.book_append_sheet(book, sheet, "材料实体搜索结果");
+    xlsx.writeFile(book, `上海信息价材料搜索结果-${manifest?.latestPeriod ?? "latest"}.xlsx`);
   }
 
   if (status === "loading") {
@@ -220,9 +356,14 @@ export function PriceDashboard() {
           <p className="eyebrow">Shanghai Construction Price Index</p>
           <h1>上海信息价数据库比对系统</h1>
         </div>
-        <div className="data-badge" title="当前展示的是 public/data 中的静态数据">
-          <RefreshCcw size={16} />
-          <span>最新期 {manifest?.latestPeriod}</span>
+        <div className="topbar-actions">
+          <Link className="admin-link" href="/admin">
+            后台
+          </Link>
+          <div className="data-badge" title="当前展示的是 public/data 中的静态数据">
+            <RefreshCcw size={16} />
+            <span>最新期 {manifest?.latestPeriod}</span>
+          </div>
         </div>
       </header>
 
@@ -247,7 +388,7 @@ export function PriceDashboard() {
           <strong>{latest.length}</strong>
         </div>
         <div>
-          <span>当前匹配</span>
+          <span>当前匹配实体</span>
           <strong>{matchedResults.length}</strong>
         </div>
         <div>
@@ -255,54 +396,141 @@ export function PriceDashboard() {
           <strong>{manifest?.periods.length}</strong>
         </div>
         <div>
-          <span>总记录</span>
-          <strong>{manifest?.indexedMaterials ?? materials.length}</strong>
+          <span>材料实体</span>
+          <strong>{manifest?.indexedEntities ?? materials.length}</strong>
         </div>
       </section>
 
       <section className="content-grid">
         <div className="table-panel">
           <div className="panel-title">
-            <h2>材料查询结果</h2>
+            <h2>材料搜索结果</h2>
             <span>
-              共 {matchedResults.length} 条，第 {page} / {totalPages} 页
+              共 {matchedResults.length} 个实体，第 {page} / {totalPages} 页
             </span>
           </div>
           <div className="table-wrap">
             <table>
               <thead>
                 <tr>
-                  <th>材料</th>
-                  <th>规格</th>
-                  <th>单位</th>
-                  <th>含税价</th>
-                  <th>期号</th>
+                  <th>材料实体</th>
+                  <th>规格 / 单位</th>
+                  <th>最新价</th>
+                  <th>历史</th>
+                  <th>对比</th>
                 </tr>
               </thead>
               <tbody>
-                {pagedResults.map((record) => (
-                  <tr
-                    className={record.materialKey === selectedRecord?.materialKey ? "selected" : ""}
-                    key={record.materialKey}
-                    onClick={() => setSelectedKey(record.materialKey)}
-                  >
-                    <td>
-                      <strong>{record.materialName}</strong>
-                      <span>{record.materialCode}</span>
-                    </td>
-                    <td>{record.spec}</td>
-                    <td>{record.unit}</td>
-                    <td>{formatPrice(record.taxIncludedPrice)}</td>
-                    <td>{record.period}</td>
-                  </tr>
-                ))}
+                {pagedResults.map((entity) => {
+                  const expanded = expandedIds.has(entity.id);
+                  const detailHistory = sortHistory(historyForEntity(historyCache, entity), "desc");
+
+                  return (
+                    <Fragment key={entity.id}>
+                      <tr
+                        className={entity.id === selectedEntity?.id ? "selected" : ""}
+                        onClick={() => selectEntity(entity)}
+                      >
+                        <td>
+                          <div className="material-cell">
+                            <button
+                              aria-label={expanded ? "收起期数明细" : "展开期数明细"}
+                              className="icon-button"
+                              onClick={(event) => {
+                                event.stopPropagation();
+                                toggleExpanded(entity);
+                              }}
+                              title={expanded ? "收起期数明细" : "展开期数明细"}
+                              type="button"
+                            >
+                              {expanded ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+                            </button>
+                            <div>
+                              <strong>{entity.displayName}</strong>
+                              <span>{entity.code || "无编码"}</span>
+                            </div>
+                          </div>
+                        </td>
+                        <td>
+                          <strong>{entity.spec || "-"}</strong>
+                          <span>{entity.unit}</span>
+                        </td>
+                        <td>
+                          <strong>{formatPrice(entity.latestPrice)}</strong>
+                          <span>{entity.latestPeriod}</span>
+                        </td>
+                        <td>
+                          <strong>{entity.periodCount} 期</strong>
+                          <span>
+                            {entity.periodCount > 1
+                              ? `全段 ${formatPercent(entity.priceChangePercent)}`
+                              : "仅有单期"}
+                          </span>
+                        </td>
+                        <td>
+                          <label
+                            className="compare-toggle"
+                            onClick={(event) => event.stopPropagation()}
+                          >
+                            <input
+                              checked={compareIds.includes(entity.id)}
+                              onChange={() => toggleCompare(entity)}
+                              type="checkbox"
+                            />
+                            <span>加入</span>
+                          </label>
+                        </td>
+                      </tr>
+                      {expanded ? (
+                        <tr className="history-row">
+                          <td colSpan={5}>
+                            <div className="history-detail">
+                              <div className="history-heading">
+                                <strong>{entityLabel(entity)} 期数明细</strong>
+                                <span>
+                                  {historyLoading.has(entity.id)
+                                    ? "正在读取历史..."
+                                    : `匹配 ${detailHistory.length} 条价格记录`}
+                                </span>
+                              </div>
+                              <div className="history-table-wrap">
+                                <table>
+                                  <thead>
+                                    <tr>
+                                      <th>期数</th>
+                                      <th>含税价</th>
+                                      <th>单位</th>
+                                      <th>规格</th>
+                                      <th>来源</th>
+                                    </tr>
+                                  </thead>
+                                  <tbody>
+                                    {detailHistory.map((record) => (
+                                      <tr key={`${entity.id}-${record.period}-${record.sourceFile}`}>
+                                        <td>{record.period}</td>
+                                        <td>{formatPrice(record.taxIncludedPrice)}</td>
+                                        <td>{record.unit}</td>
+                                        <td>{record.spec || "-"}</td>
+                                        <td>{record.sourceFile}</td>
+                                      </tr>
+                                    ))}
+                                  </tbody>
+                                </table>
+                              </div>
+                            </div>
+                          </td>
+                        </tr>
+                      ) : null}
+                    </Fragment>
+                  );
+                })}
               </tbody>
             </table>
           </div>
           <div className="pagination-bar">
             <span>
               当前显示 {pagedResults.length === 0 ? 0 : (page - 1) * PAGE_SIZE + 1}-
-              {Math.min(page * PAGE_SIZE, matchedResults.length)} 条
+              {Math.min(page * PAGE_SIZE, matchedResults.length)} 个实体
             </span>
             <div>
               <button
@@ -327,74 +555,150 @@ export function PriceDashboard() {
 
         <div className="detail-panel">
           <div className="panel-title">
-            <h2>{selectedRecord?.materialName ?? "请选择材料"}</h2>
-            <span>{selectedRecord?.spec}</span>
+            <h2>
+              {comparisonEntities.length === 0
+                ? "请选择材料查看趋势"
+                : comparisonEntities.length === 1
+                  ? `${comparisonEntities[0].displayName} 历史价格`
+                  : "材料价格走势对比"}
+            </h2>
+            <span>{focusedEntity ? `${focusedEntity.periodCount} 个有效历史期数` : ""}</span>
           </div>
 
           <div className="chart-box">
-            <ResponsiveContainer width="100%" height={260}>
-              <LineChart data={trend} margin={{ left: 4, right: 16, top: 12, bottom: 8 }}>
-                <CartesianGrid strokeDasharray="4 4" stroke="#d7dde8" />
-                <XAxis dataKey="period" tick={{ fontSize: 12 }} />
-                <YAxis
-                  tick={{ fontSize: 12 }}
-                  width={54}
-                  domain={["dataMin - 10", "dataMax + 10"]}
-                />
-                <Tooltip formatter={(value) => [formatPrice(Number(value)), "含税价"]} />
-                <Line
-                  type="monotone"
-                  dataKey="price"
-                  stroke="#2563eb"
-                  strokeWidth={3}
-                  dot={{ r: 4 }}
-                  activeDot={{ r: 6 }}
-                />
-              </LineChart>
-            </ResponsiveContainer>
+            {trendRows.length === 0 ? (
+              <div className="chart-empty">请选择材料查看真实历史数据点。</div>
+            ) : (
+              <ResponsiveContainer width="100%" height={330}>
+                <LineChart data={trendRows} margin={{ left: 4, right: 16, top: 12, bottom: 8 }}>
+                  <CartesianGrid strokeDasharray="4 4" stroke="#d7dde8" />
+                  <XAxis dataKey="period" tick={{ fontSize: 12 }} minTickGap={18} />
+                  <YAxis
+                    tick={{ fontSize: 12 }}
+                    width={62}
+                    domain={["dataMin - 10", "dataMax + 10"]}
+                  />
+                  <Tooltip
+                    formatter={(value, name) => [
+                      value === null || value === undefined ? "-" : formatPrice(Number(value)),
+                      name
+                    ]}
+                  />
+                  {comparisonEntities.length > 1 ? <Legend /> : null}
+                  {comparisonEntities.map((entity, index) => (
+                    <Line
+                      activeDot={{ r: 6 }}
+                      connectNulls={false}
+                      dataKey={entity.id}
+                      dot={{ r: 4 }}
+                      key={entity.id}
+                      name={entityLabel(entity)}
+                      stroke={CHART_COLORS[index % CHART_COLORS.length]}
+                      strokeWidth={3}
+                      type="monotone"
+                    />
+                  ))}
+                  <Brush
+                    dataKey="period"
+                    endIndex={brushRange.endIndex}
+                    height={28}
+                    onChange={(range) => {
+                      if (range?.startIndex === undefined || range?.endIndex === undefined) return;
+                      setBrushRange({
+                        startIndex: range.startIndex,
+                        endIndex: range.endIndex
+                      });
+                      setRangeMode("custom");
+                    }}
+                    startIndex={brushRange.startIndex}
+                    stroke="#2563eb"
+                  />
+                </LineChart>
+              </ResponsiveContainer>
+            )}
           </div>
 
-          <div className="compare-panel">
-            <div className="compare-controls">
-              <label>
-                月份 A
-                <select value={monthA} onChange={(event) => setMonthA(event.target.value)}>
-                  {manifest?.periods.map((period) => (
-                    <option value={period} key={period}>
-                      {period}
-                    </option>
-                  ))}
-                </select>
-              </label>
-              <label>
-                月份 B
-                <select value={monthB} onChange={(event) => setMonthB(event.target.value)}>
-                  {manifest?.periods.map((period) => (
-                    <option value={period} key={period}>
-                      {period}
-                    </option>
-                  ))}
-                </select>
-              </label>
+          <div className="trend-workbench">
+            {focusedAllPointCount === 1 ? (
+              <p className="data-note">该材料仅有 1 期数据，无法形成趋势曲线。</p>
+            ) : focusedSummary.pointCount === 2 ? (
+              <p className="data-note">当前趋势仅基于 2 期真实数据点。</p>
+            ) : focusedSummary.pointCount === 1 ? (
+              <p className="data-note">当前时间范围仅保留 1 个真实数据点。</p>
+            ) : null}
+
+            {unitSet.size > 1 ? (
+              <p className="warning-note">单位不同，价格对比可能不具备直接可比性。</p>
+            ) : null}
+            {compareNotice ? <p className="warning-note">{compareNotice}</p> : null}
+
+            <div className="compare-chips">
+              {comparisonEntities.map((entity) => (
+                <span className="compare-chip" key={entity.id}>
+                  {entityLabel(entity)}
+                  {compareIds.includes(entity.id) ? (
+                    <button
+                      aria-label={`移除 ${entityLabel(entity)}`}
+                      onClick={() => toggleCompare(entity)}
+                      title="移出对比"
+                      type="button"
+                    >
+                      <X size={14} />
+                    </button>
+                  ) : null}
+                </span>
+              ))}
             </div>
 
-            <div className="compare-result">
+            <div className="range-controls">
+              <span>时间范围</span>
+              <button
+                className={rangeMode === "6" ? "active" : ""}
+                onClick={() => setRecentRange(6)}
+                type="button"
+              >
+                最近 6 个月
+              </button>
+              <button
+                className={rangeMode === "12" ? "active" : ""}
+                onClick={() => setRecentRange(12)}
+                type="button"
+              >
+                最近 12 个月
+              </button>
+              <button
+                className={rangeMode === "all" ? "active" : ""}
+                onClick={setAllRange}
+                type="button"
+              >
+                全部历史
+              </button>
+              <strong>{rangeText(visibleTrendRows)}</strong>
+            </div>
+
+            <div className="summary-grid">
               <div>
-                <span>{monthA}</span>
-                <strong>{formatPrice(compare.base?.taxIncludedPrice)}</strong>
+                <span>当前选中</span>
+                <strong>{comparisonEntities.length}</strong>
               </div>
               <div>
-                <span>{monthB}</span>
-                <strong>{formatPrice(compare.target?.taxIncludedPrice)}</strong>
+                <span>可见真实点</span>
+                <strong>{focusedSummary.pointCount}</strong>
               </div>
-              <div className={compare.diff !== null && compare.diff >= 0 ? "up" : "down"}>
-                {compare.diff !== null && compare.diff >= 0 ? (
-                  <ArrowUpRight size={18} />
-                ) : (
-                  <ArrowDownRight size={18} />
-                )}
-                <strong>{formatPrice(compare.diff)}</strong>
-                <span>{formatPercent(compare.percent)}</span>
+              <div>
+                <span>最新价</span>
+                <strong>{formatPrice(focusedSummary.latest?.taxIncludedPrice)}</strong>
+              </div>
+              <div>
+                <span>区间最高 / 最低</span>
+                <strong>
+                  {formatPrice(focusedSummary.max?.taxIncludedPrice)} /{" "}
+                  {formatPrice(focusedSummary.min?.taxIncludedPrice)}
+                </strong>
+              </div>
+              <div>
+                <span>涨跌幅摘要</span>
+                <strong>{formatPercent(focusedSummary.percent)}</strong>
               </div>
             </div>
           </div>

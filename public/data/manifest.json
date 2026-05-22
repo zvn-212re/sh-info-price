@@ -84,9 +84,12 @@
     "2026-03",
     "2026-04"
   ],
-  "generatedAt": "2026-05-19T18:13:19.053Z",
+  "generatedAt": "2026-05-22T13:15:19.414Z",
   "totalRecords": 541830,
   "latestRecords": 4583,
-  "historyFiles": 8748,
-  "indexedMaterials": 8748
+  "historyFiles": 8408,
+  "indexedMaterials": 8408,
+  "indexedEntities": 8408,
+  "singlePeriodEntities": 74,
+  "twoPeriodEntities": 3
 }

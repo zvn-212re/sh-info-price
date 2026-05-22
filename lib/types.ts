@@ -1,5 +1,6 @@
 export type PriceRecord = {
   period: string;
+  materialEntityId?: string;
   materialKey: string;
   materialCode: string;
   materialName: string;
@@ -11,9 +12,38 @@ export type PriceRecord = {
   historyFile?: string;
 };
 
-export type SearchIndexRecord = PriceRecord & {
+export type MaterialEntity = {
+  id: string;
+  code: string;
+  displayName: string;
+  normalizedName: string;
+  spec: string;
+  unit: string;
+  aliases: string[];
+  recordCount: number;
+  periodCount: number;
+  oldestPeriod: string;
+  oldestPrice: number;
+  latestPeriod: string;
+  latestPrice: number;
+  priceChange: number | null;
+  priceChangePercent: number | null;
+  historyFile: string;
+  sourceKeys: string[];
+  searchText: string;
+
+  // Compatibility fields retained for the static fallback tool and exports.
+  period: string;
+  materialKey: string;
+  materialCode: string;
+  materialName: string;
+  taxIncludedPrice: number;
+  publishDate: string;
+  sourceFile: string;
   text: string;
 };
+
+export type SearchIndexRecord = MaterialEntity;
 
 export type DataManifest = {
   latestPeriod: string;
@@ -23,6 +53,9 @@ export type DataManifest = {
   latestRecords?: number;
   historyFiles?: number;
   indexedMaterials?: number;
+  indexedEntities?: number;
+  singlePeriodEntities?: number;
+  twoPeriodEntities?: number;
 };
 
 export type CompareResult = {

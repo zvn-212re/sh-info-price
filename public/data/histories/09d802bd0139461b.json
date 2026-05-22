@@ -440,6 +440,28 @@
     "sourceFile": "2020-02.xls"
   },
   {
+    "period": "2020-03",
+    "materialKey": "17250224-010-硬聚氯乙烯排水管-pvc-u-dn160-4-0-m",
+    "materialCode": "17250224-010",
+    "materialName": "硬聚氯乙烯排水管（PVC-U）DN160×4.0",
+    "spec": "",
+    "unit": "m",
+    "taxIncludedPrice": 47.6,
+    "publishDate": "2020-03-27",
+    "sourceFile": "2020-03.xls"
+  },
+  {
+    "period": "2020-03",
+    "materialKey": "17250224-010-硬聚氯乙烯排水管-pvc-u-dn160-4-0-m",
+    "materialCode": "17250224-010",
+    "materialName": "硬聚氯乙烯排水管（PVC-U）DN160×4.0",
+    "spec": "",
+    "unit": "m",
+    "taxIncludedPrice": 47.6,
+    "publishDate": "2020-03-27",
+    "sourceFile": "2020-03.xls"
+  },
+  {
     "period": "2020-05",
     "materialKey": "17250224-010-硬聚氯乙烯排水管-pvc-u-dn160-sn4-sdr41-m",
     "materialCode": "17250224-010",

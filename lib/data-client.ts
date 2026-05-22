@@ -1,4 +1,4 @@
-import type { DataManifest, PriceRecord, SearchIndexRecord } from "./types";
+import type { DataManifest, MaterialEntity, PriceRecord } from "./types";
 
 const DATA_BASE_PATH = (process.env.NEXT_PUBLIC_BASE_PATH || "").replace(/\/$/, "");
 
@@ -25,7 +25,7 @@ export function fetchLatest() {
 }
 
 export function fetchSearchIndex() {
-  return readJson<SearchIndexRecord[]>("/data/search-index.json");
+  return readJson<MaterialEntity[]>("/data/search-index.json");
 }
 
 export function fetchPeriod(period: string) {
