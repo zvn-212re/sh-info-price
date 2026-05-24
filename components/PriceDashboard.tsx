@@ -35,6 +35,26 @@ type BrushRange = { startIndex: number; endIndex: number };
 const PAGE_SIZE = 30;
 const MAX_COMPARE = 5;
 const CHART_COLORS = ["#2563eb", "#0f766e", "#dc2626", "#9333ea", "#d97706"];
+const APP_UPDATES = [
+  {
+    version: "v0.4.0",
+    date: "2026-05-24",
+    title: "材料实体检索与多材料趋势对比",
+    summary: "搜索结果按材料实体聚合，支持展开真实期数明细、最多 5 个材料同图对比和时间范围缩放。"
+  },
+  {
+    version: "v0.3.1",
+    date: "2026-05-24",
+    title: "历史数据加载诊断",
+    summary: "历史文件读取失败时明确提示，不再把加载异常伪装成单期趋势。"
+  },
+  {
+    version: "v0.3.0",
+    date: "2026-05-22",
+    title: "82 期静态数据索引",
+    summary: "接入 2019-05 至 2026-04 的官方材料信息价，按材料实体生成独立历史文件。"
+  }
+];
 
 function entityFallbackHistory(entity: MaterialEntity): PriceRecord[] {
   return [
@@ -60,14 +80,15 @@ function entityLabel(entity: MaterialEntity) {
 
 function historyForEntity(cache: Map<string, PriceRecord[]>, entity?: MaterialEntity) {
   if (!entity) return [];
-  return cache.get(entity.id) ?? entityFallbackHistory(entity);
+  return cache.get(entity.id) ?? [];
 }
 
-function logHistoryDiagnostic(entity: MaterialEntity, history: PriceRecord[]) {
+function logHistoryDiagnostic(entity: MaterialEntity, history: PriceRecord[], status = "loaded") {
   if (process.env.NODE_ENV === "production") return;
 
   const periods = uniqueHistoryPeriods(history).map((record) => record.period);
   console.info("[material-history-diagnostic]", {
+    status,
     entityId: entity.id,
     code: entity.code,
     displayName: entity.displayName,
@@ -93,6 +114,7 @@ export function PriceDashboard() {
   const [materials, setMaterials] = useState<MaterialEntity[]>([]);
   const [historyCache, setHistoryCache] = useState<Map<string, PriceRecord[]>>(new Map());
   const [historyLoading, setHistoryLoading] = useState<Set<string>>(new Set());
+  const [historyErrors, setHistoryErrors] = useState<Map<string, string>>(new Map());
   const [keyword, setKeyword] = useState("水泥");
   const [page, setPage] = useState(1);
   const [selectedId, setSelectedId] = useState("");
@@ -182,10 +204,16 @@ export function PriceDashboard() {
           : entityFallbackHistory(entity);
         logHistoryDiagnostic(entity, history);
         setHistoryCache((current) => new Map(current).set(entity.id, sortHistory(history)));
-      } catch {
-        const fallback = entityFallbackHistory(entity);
-        logHistoryDiagnostic(entity, fallback);
-        setHistoryCache((current) => new Map(current).set(entity.id, fallback));
+        setHistoryErrors((current) => {
+          const next = new Map(current);
+          next.delete(entity.id);
+          return next;
+        });
+      } catch (historyError) {
+        const message =
+          historyError instanceof Error ? historyError.message : "历史价格文件加载失败";
+        logHistoryDiagnostic(entity, [], "error");
+        setHistoryErrors((current) => new Map(current).set(entity.id, message));
       } finally {
         setHistoryLoading((current) => {
           const next = new Set(current);
@@ -218,6 +246,13 @@ export function PriceDashboard() {
       }))
     );
   }, [comparisonEntities, historyCache]);
+  const comparisonHistoryErrors = comparisonEntities
+    .map((entity) => ({
+      entity,
+      message: historyErrors.get(entity.id)
+    }))
+    .filter((item): item is { entity: MaterialEntity; message: string } => Boolean(item.message));
+  const isComparisonLoading = comparisonEntities.some((entity) => historyLoading.has(entity.id));
 
   useEffect(() => {
     setBrushRange({
@@ -246,6 +281,7 @@ export function PriceDashboard() {
     [focusedHistory, visiblePeriods]
   );
   const focusedAllPointCount = uniqueHistoryPeriods(focusedHistory).length;
+  const focusedHistoryError = focusedEntity ? historyErrors.get(focusedEntity.id) : "";
   const unitSet = new Set(comparisonEntities.map((entity) => entity.unit).filter(Boolean));
 
   function selectEntity(entity: MaterialEntity) {
@@ -401,6 +437,27 @@ export function PriceDashboard() {
         </div>
       </section>
 
+      <section className="release-panel" aria-label="版本更新日志">
+        <div className="release-heading">
+          <div>
+            <p className="eyebrow">Release Notes</p>
+            <h2>更新日志</h2>
+          </div>
+          <span>当前版本 {APP_UPDATES[0].version}</span>
+        </div>
+        <div className="release-list">
+          {APP_UPDATES.map((item) => (
+            <article key={item.version}>
+              <span>
+                {item.version} · {item.date}
+              </span>
+              <strong>{item.title}</strong>
+              <p>{item.summary}</p>
+            </article>
+          ))}
+        </div>
+      </section>
+
       <section className="content-grid">
         <div className="table-panel">
           <div className="panel-title">
@@ -424,6 +481,7 @@ export function PriceDashboard() {
                 {pagedResults.map((entity) => {
                   const expanded = expandedIds.has(entity.id);
                   const detailHistory = sortHistory(historyForEntity(historyCache, entity), "desc");
+                  const detailError = historyErrors.get(entity.id);
 
                   return (
                     <Fragment key={entity.id}>
@@ -490,33 +548,41 @@ export function PriceDashboard() {
                                 <span>
                                   {historyLoading.has(entity.id)
                                     ? "正在读取历史..."
-                                    : `匹配 ${detailHistory.length} 条价格记录`}
+                                    : detailError
+                                      ? "历史读取失败"
+                                      : `匹配 ${detailHistory.length} 条价格记录`}
                                 </span>
                               </div>
-                              <div className="history-table-wrap">
-                                <table>
-                                  <thead>
-                                    <tr>
-                                      <th>期数</th>
-                                      <th>含税价</th>
-                                      <th>单位</th>
-                                      <th>规格</th>
-                                      <th>来源</th>
-                                    </tr>
-                                  </thead>
-                                  <tbody>
-                                    {detailHistory.map((record) => (
-                                      <tr key={`${entity.id}-${record.period}-${record.sourceFile}`}>
-                                        <td>{record.period}</td>
-                                        <td>{formatPrice(record.taxIncludedPrice)}</td>
-                                        <td>{record.unit}</td>
-                                        <td>{record.spec || "-"}</td>
-                                        <td>{record.sourceFile}</td>
+                              {detailError ? (
+                                <p className="warning-note">
+                                  历史价格文件加载失败：{detailError}
+                                </p>
+                              ) : (
+                                <div className="history-table-wrap">
+                                  <table>
+                                    <thead>
+                                      <tr>
+                                        <th>期数</th>
+                                        <th>含税价</th>
+                                        <th>单位</th>
+                                        <th>规格</th>
+                                        <th>来源</th>
                                       </tr>
-                                    ))}
-                                  </tbody>
-                                </table>
-                              </div>
+                                    </thead>
+                                    <tbody>
+                                      {detailHistory.map((record) => (
+                                        <tr key={`${entity.id}-${record.period}-${record.sourceFile}`}>
+                                          <td>{record.period}</td>
+                                          <td>{formatPrice(record.taxIncludedPrice)}</td>
+                                          <td>{record.unit}</td>
+                                          <td>{record.spec || "-"}</td>
+                                          <td>{record.sourceFile}</td>
+                                        </tr>
+                                      ))}
+                                    </tbody>
+                                  </table>
+                                </div>
+                              )}
                             </div>
                           </td>
                         </tr>
@@ -567,7 +633,13 @@ export function PriceDashboard() {
 
           <div className="chart-box">
             {trendRows.length === 0 ? (
-              <div className="chart-empty">请选择材料查看真实历史数据点。</div>
+              <div className="chart-empty">
+                {comparisonHistoryErrors.length > 0
+                  ? "历史价格文件加载失败，无法绘制真实趋势。"
+                  : isComparisonLoading
+                    ? "正在读取历史价格数据..."
+                    : "请选择材料查看真实历史数据点。"}
+              </div>
             ) : (
               <ResponsiveContainer width="100%" height={330}>
                 <LineChart data={trendRows} margin={{ left: 4, right: 16, top: 12, bottom: 8 }}>
@@ -619,7 +691,9 @@ export function PriceDashboard() {
           </div>
 
           <div className="trend-workbench">
-            {focusedAllPointCount === 1 ? (
+            {focusedHistoryError ? (
+              <p className="warning-note">历史价格文件加载失败：{focusedHistoryError}</p>
+            ) : focusedAllPointCount === 1 ? (
               <p className="data-note">该材料仅有 1 期数据，无法形成趋势曲线。</p>
             ) : focusedSummary.pointCount === 2 ? (
               <p className="data-note">当前趋势仅基于 2 期真实数据点。</p>
@@ -629,6 +703,11 @@ export function PriceDashboard() {
 
             {unitSet.size > 1 ? (
               <p className="warning-note">单位不同，价格对比可能不具备直接可比性。</p>
+            ) : null}
+            {comparisonHistoryErrors.length > (focusedHistoryError ? 1 : 0) ? (
+              <p className="warning-note">
+                有 {comparisonHistoryErrors.length} 个材料的历史数据读取失败，图表仅显示已加载的真实数据。
+              </p>
             ) : null}
             {compareNotice ? <p className="warning-note">{compareNotice}</p> : null}
 
